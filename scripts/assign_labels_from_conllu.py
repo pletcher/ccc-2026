@@ -98,8 +98,44 @@ def build_dataframe(counts: dict[tuple[str, str], dict[str, int]]) -> pd.DataFra
     return df
 
 
-if __name__ == "__main__":
-    counts = build_counts()
-    df = build_dataframe(counts)
+def build_epic_counts() -> dict[str, dict[str, int]]:
+    counts: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
 
-    df.to_parquet(ROOT_DIR / "parquet" / "homer_speech_narrative.parquet")
+    for work, path in FILES.items():
+        for sent in conllu.parse_incr(path.open()):
+            for token in sent:
+                lemma = token["lemma"]
+
+                if (
+                    not lemma
+                    or lemma in STOPWORDS
+                    or all(c in PUNCTUATION for c in lemma)
+                ):
+                    continue
+
+                counts[work][lemma] += 1
+
+    return counts
+
+
+def build_epic_dataframe(counts: dict[str, dict[str, int]]) -> pd.DataFrame:
+    works = list(FILES.keys())
+    lemmata = sorted({lemma for cell in counts.values() for lemma in cell})
+
+    df = pd.DataFrame(0, index=lemmata, columns=works)
+    df.index.name = "lemma"
+
+    for work, cell in counts.items():
+        df[work] = df.index.map(cell).fillna(0).astype(int)
+
+    return df
+
+
+if __name__ == "__main__":
+    # counts = build_counts()
+    # df = build_dataframe(counts)
+    # df.to_parquet(ROOT_DIR / "parquet" / "homer_speech_narrative.parquet")
+
+    epic_counts = build_epic_counts()
+    epic_df = build_epic_dataframe(epic_counts)
+    epic_df.to_parquet(ROOT_DIR / "parquet" / "homer_epic.parquet")

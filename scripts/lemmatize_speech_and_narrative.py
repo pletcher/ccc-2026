@@ -1,3 +1,6 @@
+### This file is no longer needed, as we use the
+### Daphne treebanks in the ./conllu directory
+
 from collections import defaultdict
 from pathlib import Path
 
