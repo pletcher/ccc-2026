@@ -19,6 +19,9 @@
 τόδις
 τάδος
 _
+comma
+period
+punc
 
 # TYPOGRAPHICAL SYMBOLS
 -

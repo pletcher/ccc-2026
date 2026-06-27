@@ -84,7 +84,8 @@ associated with the column. Similar DataFrames (the Pandas term for the data
 structure employed here) were prepared for Homer, with one row per lemma and
 columns for each epic.
 
-To calculate the "Homericness" of each lemma, the Dunning G^2 log-likelihood
+To calculate the "Homericness" or "epicness" (I will use these terms interchangeably)
+of each lemma, first the Dunning G^2 log-likelihood
 ratio of it appearing in tragedy versus it appearing in epic was calculated
 ([@Dunning1993]). Positive values mean that a lemma skews more Homeric;
 negative values indicate the it tends to appear more frequently in tragedy.
@@ -131,3 +132,37 @@ plots the most significant lemmata by relative frequency and log-likelihood,
 demonstrating a clear delineation between epic and tragedy.
 
 ![Epic vs. Tragedy fountain plot](../visualizations/epic_vs_tragedy_loglikelihood.png)
+
+Dunning's G^2 provides a readily interpretable statistic for a lemma's epic or
+tragic keyness, but it does not provide a way to compare across dramatists,
+speakers, or lines. For these comparisons, we resort to a Naive Bayes
+classifier, keeping the negative=tragedy, positive=Homer axis but instead
+calculating the frequency-weighted likelihood of a lemma appearing in either
+genre. I borrow this method from Frederick Mosteller and David Wallace's
+well-known study of the _Federalist Papers_. Although my study has no
+authorship dispute to settle between Homer and the tragedians, the use of
+per-lemma Naive Bayes log-odds, rather than frequency-weighted Dunning's G^2,
+gives us a statistic that we can average across dramatists, plays, and
+speakers, or sum across lines. (We sum, rather than average, lines because they
+are already length-normalized; we average the other scores to control for
+length.)
+
+## Results
+
+When we plot the "epicness" scores against the probable dates of each tragedy,
+we see a small but measurable decrease in epicness over time. The changes by dramatist,
+while overall less statistically significant (p > 0.5), will nevertheless not
+surprise classicists: Euripides alone appears to grow _more_ epic over time, perhaps
+owing to his well-attested penchant for archaizing language.
+
+![Epicness over time by dramatist and
+year](../visualizations/tragedy_speakers_epicness_over_time.png)
+
+What is surprising, however, is that when we group by speaker class—"chorus,"
+"messenger", or "other"—choruses speak with the least tragic language, followed
+by messengers. This result perhaps harks back to the importance of space and
+proper nouns in epic, with the chorus picking up those propensities in tragedy.
+
+![Epicness by character class](../visualizations/epicness_by_speaker_class.png)
+
+## Interpreting at scale

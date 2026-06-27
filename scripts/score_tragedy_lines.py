@@ -5,7 +5,7 @@ import stanza
 
 ROOT_DIR = Path(__file__).parent.parent
 TRAGEDY_PARQUET = ROOT_DIR / "parquet" / "tragedy-with-years.parquet"
-LOGLIKELIHOOD_PARQUET = ROOT_DIR / "parquet" / "epic_tragic_lemmata_loglikelihood.parquet"
+LOGLIKELIHOOD_PARQUET = ROOT_DIR / "parquet" / "epicness_log_ratio.parquet"
 OUT_PARQUET = ROOT_DIR / "parquet" / "tragedy_line_epicness.parquet"
 
 STOPWORDS = set(
@@ -43,7 +43,7 @@ def score_lines(df: pd.DataFrame, nlp: stanza.Pipeline, ll: pd.Series) -> pd.Dat
                 scores.append(ll[lemma])
 
         n_lemmata.append(len(scores))
-        epicness.append(sum(scores) / len(scores) if scores else float("nan"))
+        epicness.append(sum(scores) if scores else float("nan"))
 
     return df.assign(line_epicness=epicness, n_lemmata_scored=n_lemmata)
 
@@ -51,7 +51,7 @@ def score_lines(df: pd.DataFrame, nlp: stanza.Pipeline, ll: pd.Series) -> pd.Dat
 def main():
     nlp = stanza.Pipeline("grc", processors="tokenize,lemma", verbose=False)
     df = pd.read_parquet(TRAGEDY_PARQUET)
-    ll = pd.read_parquet(LOGLIKELIHOOD_PARQUET).set_index("lemma")["log_likelihood"]
+    ll = pd.read_parquet(LOGLIKELIHOOD_PARQUET).set_index("lemma")["epicness"]
 
     scored = score_lines(df, nlp, ll)
     scored.to_parquet(OUT_PARQUET)
