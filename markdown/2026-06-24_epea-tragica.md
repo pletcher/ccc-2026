@@ -73,9 +73,9 @@ and lyric meters, respectively—mean that bag-of-words models help to avoid
 potential syntactic pitfalls associated with different word order necessitated
 by different meter.
 
-Lemmata were subsequently used to build multi-indexed document-term matrices
-(DTMs) in Pandas, a Python library for data manipulation. All code used in
-these analyses is available in the following
+Lemmata were subsequently used to build document-term matrices (DTMs) in
+Pandas, a Python library for data manipulation. All code used in these analyses
+is available in the following
 [repository](https://github.com/pletcher/ccc-2026). Each row in a DTM
 represents a lemma, with columns representing dramatist, play title, and
 speaker. The value at the intersection of each row and column is the absolute
@@ -84,12 +84,12 @@ associated with the column. Similar DataFrames (the Pandas term for the data
 structure employed here) were prepared for Homer, with one row per lemma and
 columns for each epic.
 
-To calculate the "Homericness" or "epicness" (I will use these terms interchangeably)
-of each lemma, first the Dunning G^2 log-likelihood
-ratio of it appearing in tragedy versus it appearing in epic was calculated
+To calculate the "Homericness" or "epicness" (I use these terms
+interchangeably) of each lemma, first the Dunning G^2 log-likelihood ratio of
+it appearing in tragedy versus it appearing in epic was calculated
 ([@Dunning1993]). Positive values mean that a lemma skews more Homeric;
-negative values indicate the it tends to appear more frequently in tragedy.
-The top 10 lemmata for each genre are reproduced in tabular form below.
+negative values indicate the it tends to appear more frequently in tragedy. The
+top 10 lemmata for each genre are reproduced in tabular form below.
 
 Top lemmata for tragedy:
 
@@ -122,14 +122,15 @@ Top lemmata for epic
 | ἵππος    | 454.94 |
 
 For lemmata as heavily differentiated as these, p-values approach 0, indicating
-high statistical significance. Proper nouns help to differentiate epic from tragedy:
-Ἕκτωρ and Τηλέμαχος have the 11th and 12th highest log-likelihood ratios for epic,
-following the pattern established by Ὀδυσσεύς and Ἀχαιός. Tragedy, unsurprisingly, is
-distinguished by the attention that it pays to speech (λόγος) and action (δράω).
+high statistical significance. Proper nouns help to differentiate epic from
+tragedy: Ἕκτωρ and Τηλέμαχος have the 11th and 12th highest log-likelihood
+ratios for epic, following the pattern established by Ὀδυσσεύς (5th) and Ἀχαιός
+(6th). Tragedy, unsurprisingly, is distinguished by the attention that it pays
+to speech (λόγος, 1st most distinctive) and action (δράω, 8th).
 
-We can also visualize this differentiation in the following fountain graph, which
-plots the most significant lemmata by relative frequency and log-likelihood,
-demonstrating a clear delineation between epic and tragedy.
+We can also visualize this differentiation in the following fountain graph,
+which plots the most significant lemmata by relative frequency and
+log-likelihood, demonstrating a clear delineation between epic and tragedy.
 
 ![Epic vs. Tragedy fountain plot](../visualizations/epic_vs_tragedy_loglikelihood.png)
 
@@ -139,13 +140,34 @@ speakers, or lines. For these comparisons, we resort to a Naive Bayes
 classifier, keeping the negative=tragedy, positive=Homer axis but instead
 calculating the frequency-weighted likelihood of a lemma appearing in either
 genre. I borrow this method from Frederick Mosteller and David Wallace's
-well-known study of the _Federalist Papers_. Although my study has no
-authorship dispute to settle between Homer and the tragedians, the use of
-per-lemma Naive Bayes log-odds, rather than frequency-weighted Dunning's G^2,
-gives us a statistic that we can average across dramatists, plays, and
-speakers, or sum across lines. (We sum, rather than average, lines because they
-are already length-normalized; we average the other scores to control for
-length.)
+well-known study of the _Federalist Papers_ ([@Mosteller.Wallace1984]).
+Although my study has no authorship dispute to settle between Homer and the
+tragedians, the use of per-lemma Naive Bayes log-odds, rather than
+frequency-weighted Dunning's G^2, gives us a statistic that we can average
+across dramatists, plays, and speakers, or sum across lines. (We sum, rather
+than average, lines because they are already length-normalized; we average the
+other scores to control for length.)
+
+Making the naive assumption that all tokens appear independently—that our
+documents can truly be represented as "bags of words"—is not without problems,
+especially when it comes to multi-word epic formulae. The result, however,
+boils down to over-counting in favor of epic, which amounts to how we read such
+formula anyway. Put another way, even under assumptions of independence that we
+as classicists know do not hold, the data show strong enough differentiation
+that we can make inferences from it. Mosteller and Wallace encountered a
+similar problem with their study of the _Federalist Papers_: "Independence is
+an impossibly stiff condition to achieve or justify, and the reader has as many
+reasons as we for not believing in it" ([@Mosteller.Wallace1984 155]). In a
+long and technical discussion which I do not have space to cover in full here,
+Mosteller and Wallace show that their use of log-odds yields results that
+justify the assumption of independence. In terms of epic versus tragedy, their
+formula ([@Mosteller.Wallace1984 195]) could be expressed as
+
+$$\lambda(w) = \log \frac{P(w \mid \text{epic})}{P(w \mid \text{tragedy})}$$
+
+where $\lambda(w)$ is the epicness score for a word $w$, and $P(w \mid
+\text{epic})$ and $P(w \mid \text{tragedy})$ are the probabilities that a word
+appears in epic and tragedy, respectively.
 
 ## Results
 
@@ -165,4 +187,21 @@ proper nouns in epic, with the chorus picking up those propensities in tragedy.
 
 ![Epicness by character class](../visualizations/epicness_by_speaker_class.png)
 
-## Interpreting at scale
+## Interpreting by line, at scale
+
+In order to make these results more interpretable, I have built a small reading
+environment for the corpus of Attic tragedy which enables visualizing the
+aggregate epicness by line while reading a given tragedy. This visualization is
+a static site built using many of the same tools that the new Perseus Digital
+Library will use; it is hosted at the following URL:
+<https://pletcher.github.io/ccc-2026-web/>
+
+### Case Study 1: Aeschylus' _Suppliants_
+
+### Case Study 2: Sophocles' _Ajax_
+
+### Case Study 3: Euripides' _Heracles_
+
+### Case Study 4: Sophocles' _Electra_
+
+## Conclusion
