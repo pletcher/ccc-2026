@@ -13,3 +13,4 @@ wheels/
 *.conllu
 Daphne
 .DS_Store
+*.docx

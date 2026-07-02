@@ -28,16 +28,47 @@ SPEECH_JSON = {
 }
 
 
-def build_speech_lines(work: str) -> set[tuple[str, str]]:
+def ordered_refs(path: Path) -> list[tuple[str, str]]:
+    refs: list[tuple[str, str]] = []
+    for sent in conllu.parse_incr(path.open()):
+        for token in sent:
+            misc = token.get("misc") or {}
+            ref = misc.get("Ref")
+            if not ref:
+                continue
+            book, line = ref.split(".")
+            if not refs or refs[-1] != (book, line):
+                refs.append((book, line))
+    return refs
+
+
+def build_speech_lines(work: str, refs: list[tuple[str, str]]) -> set[tuple[str, str]]:
+    """Expand each speech's line range into (book, line) tuples.
+
+    A handful of speeches (e.g. Odysseus's tale to the Phaeacians) span
+    multiple books, so we can't always assume `l_fi` and `l_la` share a book
+    and do naive int arithmetic on the line numbers. For those we look up
+    where each endpoint falls in the treebank's actual line sequence and
+    slice between them. Same-book ranges use plain int arithmetic instead,
+    since a handful of line numbers (e.g. Odyssey 10.456) are simply absent
+    from this edition's text and wouldn't resolve to an index.
+    """
     speeches = json.loads(SPEECH_JSON[work].read_text())
+    ref_index = {ref: i for i, ref in enumerate(refs)}
     lines: set[tuple[str, str]] = set()
 
     for s in speeches:
-        book, start = s["l_fi"].split(".")
-        _, end = s["l_la"].split(".")
+        book_fi, line_fi = s["l_fi"].split(".")
+        book_la, line_la = s["l_la"].split(".")
 
-        for line in range(int(start), int(end) + 1):
-            lines.add((book, str(line)))
+        if book_fi == book_la:
+            for line in range(int(line_fi), int(line_la) + 1):
+                lines.add((book_fi, str(line)))
+            continue
+
+        start_idx = ref_index[(book_fi, line_fi)]
+        end_idx = ref_index[(book_la, line_la)]
+        lines.update(refs[start_idx : end_idx + 1])
 
     return lines
 
@@ -48,7 +79,8 @@ def build_counts() -> dict[tuple[str, str], dict[str, int]]:
     )
 
     for work, path in FILES.items():
-        speech_lines = build_speech_lines(work)
+        refs = ordered_refs(path)
+        speech_lines = build_speech_lines(work, refs)
 
         for sent in conllu.parse_incr(path.open()):
             for token in sent:
@@ -132,9 +164,9 @@ def build_epic_dataframe(counts: dict[str, dict[str, int]]) -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    # counts = build_counts()
-    # df = build_dataframe(counts)
-    # df.to_parquet(ROOT_DIR / "parquet" / "homer_speech_narrative.parquet")
+    counts = build_counts()
+    df = build_dataframe(counts)
+    df.to_parquet(ROOT_DIR / "parquet" / "homer_speech_narrative.parquet")
 
     epic_counts = build_epic_counts()
     epic_df = build_epic_dataframe(epic_counts)
