@@ -28,14 +28,75 @@ growing—body of work makes it challenging to find an entrypoint, even when we 
 the Digital Initiative for Classics: Epic Speeches (DICES) database. Nevertheless, we can profit
 from using these new tools to verify previous claims and perhaps start formulating new ones.
 
-I divide this paper in two disjointed parts: in the first part, I demonstrate the use of the
-DICES database by incorporating it into corraborating some of Griffin's claims. This talk focuses
-on the use of DICES to compare speech and narrative in Homer. In the second part, I turn to a
-different sort of speech-narrative comparison between epic and tragedy, borrowing many of the same
-methods from the first part and applying them to different registers. My aim is to show how such
-examinations of "Homericness"—both within Homer and within what we might call Homeric reception—
-enrich our understanding of ancient literary and performance traditions while also opening up new
-avenues of inquiry.
+I divide this paper in two parts: in the first part, I demonstrate the use of the DICES database
+by incorporating it into corraborating some of Griffin's claims. This talk focuses on the use of
+DICES to compare speech and narrative in Homer. In the second part, I turn to a different sort
+of speech-narrative comparison between epic and tragedy, borrowing many of the same methods from
+the first part and applying them to different registers. My aim is to show how such examinations
+of "Homericness"—both within Homer and within what we might call Homeric reception— enrich our
+understanding of ancient literary and performance traditions while also opening up new avenues of
+inquiry.
+
+## Speech and/in performance
+
+As McConnell and others have shown ([-@McConnell2025 168–187]), epic speech and narrative
+show distinct patterns in terms of late linguistic features, formulaic language, and—most
+controversially, propensity for recomposition in performance. Strikingly, scholars like Jasper
+Griffin, who decry the "oralists" whose epics only started to standardize around the time of the
+Pisistratus' introduction of rhapsodic competition at the Panathenaea.
+I want to turn here to some of the data drawn from DICES to show, first, that Griffin's
+observations and reckonings—word counts—generally hit the mark; but, second, that his
+conclusions do not seem to be supported by the same data that he has collected.
+
+Griffin asserts, for example, that σέβας and σεβάζομαι are both words of moral judgment that are
+restricted to direct speech ([@Griffin1986 40]). The DICES data confirm this observation! But he
+uses this observation to "express rather boldly ... that in important senses the Homeric epics
+have two vocabularies" (Ibid.). Further, he uses the two vocabulary hypothesis to argue against the
+recomposition views of the oralists in favor of earlier written standardization of the epics.
+
+Elsewhere in his self-styled polemic, Griffin traces the use morally-loaded bigrams and trigrams
+(groups of two or three words, respectively—he calls them "phrases") in character speech to show
+once again that, in his view, because the Homeric narrator so carefully avoids moral judgment, while
+character speech deploys it so freely, the poems must have been written down. However, a closer
+look at the frequency and statistical likelihood of all bigrams across both registers (speech and
+narrative) complicates this view. I want to flag a key assumption I'm making here, namely that
+bigrams are atomic units of formulaic speech. Not all bigrams are formulae or parts of formulae
+themselves, and many epic formulae consist of trigrams or quadgrams instead. But bigrams are the
+smallest unit that can begin to show features of formulaic diction and so can provide evidence for
+the earlier standardization of certain passages in the epics.
+
+![Volcano plot of bigram log-likelihood](../visualizations/bigram-loglikelihood.png)
+
+As can be seen in this plot, narrative bigrams are both more distinctive—their log likelihoods have
+greater absolute values—and more numerous than their counterparts in direct speech. Taking the top
+15 bigrams from each register, we can make the same observation appear even more starkly.
+
+![Bar chart of top 15 bigram log-likelihood](../visualizations/bigram-loglikelihood-bar-chart.png)
+
+Griffin's observations that moral judgments are mostly restricted to direct speech remain true.
+Nevertheless, we should complicate his data with these further observations that show the prevalence
+of formulaic language in narrative against the relative lack thereof in speech, suggesting, as the oralists have often supposed, that the speeches provided more opportunities for recomposition
+than did the narrative sections (see [@McConnell2025, 184–186]).
+
+## Interlude: Does tragedy draw more from epic speech or narrative?
+
+A natural follow-up question to these observations when turning to tragedy is whether the language
+of tragedy has more in common with epic speech or epic narrative. Using the log-ratio of speech
+versus narrative, which measures the effect size of each lemma in determining the register in
+which it appears, we can then measure the lemmata of tragedy against these values to obtain a
+"speechiness" score for each character in tragedy and for each play. An important caveat here: the
+epics are mostly speech: by my count using the DICES data and the Daphne treebanks, they are roughly
+55% speech overall; the _Odyssey_ is 68% speech, while the _Iliad_ consists of 45% speech. This bias
+means that we should expect tragedy to have more in common epic speech, although we might find the
+effect to be mild.
+
+As it happens, tragedy shows a much stronger affinity for epic speech than for narrative, although
+earlier plays tend to show more ambivalence in this regard. The exception, as always, is Euripides,
+whose plays start out strongly in the epic speech category and drift closer to epic narrative over
+the course of his career. At no point, however, does a play become more similar in its vocabulary
+to epic narrative than to epic speech.
+
+![Tragic "speechiness"](../visualizations/tragedy-speechiness.png)
 
 ## Epic and the reception of its language in tragedy
 
@@ -63,64 +124,50 @@ assertions of Homericness in tragedy surely have merit, they have generally resi
 and their sometimes impressionistic nature has made it difficult to compare such assertions across
 tragedies and/or tragedians.
 
-
-<https://penelope.uchicago.edu/Thayer/E/Roman/Texts/Dio_Chrysostom/Discourses/52*.html>
-<https://penelope.uchicago.edu/Thayer/E/Roman/Texts/Dio_Chrysostom/Discourses/53*.html>
-
 ## Prior art
 
-Easterling quickly qualifies the cliché that opens "The Tragic Homer": "But
-there are ... striking ways in which Sophocles departs from his epic models....
-Most important of all, the language he uses is highly synthetic: it may feel
-'most Homeric' but it betrays a keen awareness both of other literature and of
-contemporary life" ([@Easterling1984 1]). In many ways, this paper picks up
-from here, measuring language _per se_ of Homer and tragedy, rather than
-tragedy's allusions to Homer—which appear frequently and have received much
-scholarly attention.^[To take two recent examples, Amelia Bensch-Schaus shows
-how Sophocles builds the title character of his _Ajax_ from two distinct
-portrayals of the "second-best of the Achaeans," namely the portrayal in the
-_Iliad_ versus his silent portrayal among the shades in the _Odyssey_
-([@Bensch-Schaus2025]). Maria Serena Mirto, contrastingly, shows how Euripides'
-_Heracles_ breaks from the mythological and Homeric tradition with its
-manipulation of the title character's paternity ([@Mirto2025]).] This paper thus
-concerns itself less with tracking Homer's influence on tragedy and more with
-the evolution of tragic language and its debts to Homer's language.
+Easterling quickly qualifies the cliché that opens "The Tragic Homer": "But there are ... striking
+ways in which Sophocles departs from his epic models.... Most important of all, the language
+he uses is highly synthetic: it may feel 'most Homeric' but it betrays a keen awareness both of
+other literature and of contemporary life" ([@Easterling1984 1]). In many ways, this paper picks
+up from here, measuring language _per se_ of Homer and tragedy, rather than tragedy's allusions
+to Homer—which appear frequently and have received much scholarly attention.^[To take two recent
+examples, Amelia Bensch-Schaus shows how Sophocles builds the title character of his _Ajax_ from two
+distinct portrayals of the "second-best of the Achaeans," namely the portrayal in the _Iliad_ versus
+his silent portrayal among the shades in the _Odyssey_ ([@Bensch-Schaus2025]). Maria Serena Mirto,
+contrastingly, shows how Euripides' _Heracles_ breaks from the mythological and Homeric tradition
+with its manipulation of the title character's paternity ([@Mirto2025]).] This paper thus concerns
+itself less with tracking Homer's influence on tragedy and more with the evolution of tragic
+language and its debts to Homer's language.
 
 ## Methodology
 
-To begin, I used the Conference on Computational Natural Language Learning
-Universal (CoNLL-U) encoding of the treebanks of Homer's _Iliad_ and _Odyssey_
-from Francesco Mambrini's Daphne project ([@Mambrini.Daphne]). Treebanks are
-richly annotated texts containing morphological information—including
-lemmata—for each token. Because not all tragedies have hand-annotated
-treebanks, the tragic corpus was lemmatized using the natural language
-processing library Stanza ([@Stanza]). (Using the CoNLL-U treebanks for
-tragedies when available but falling back to automatic lemmatization with
-Stanza would have led to data compatibility issues, so for the sake of
-consistency stanza was used for all tragedies.) Lemmatized forms were used
-rather than the inflected forms to help control for differences of dialect. The
-different meters of Homer and tragedy—dactylic hexameter and a mix of iambic
-and lyric meters, respectively—mean that bag-of-words models help to avoid
-potential syntactic pitfalls associated with different word order necessitated
-by different meter.
+To begin, I used the Conference on Computational Natural Language Learning Universal (CoNLL-U)
+encoding of the treebanks of Homer's _Iliad_ and _Odyssey_ from Francesco Mambrini's Daphne
+project ([@Mambrini.Daphne]). Treebanks are richly annotated texts containing morphological
+information—including lemmata—for each token. Because not all tragedies have hand-annotated
+treebanks, the tragic corpus was lemmatized using the natural language processing library Stanza
+([@Stanza]). (Using the CoNLL-U treebanks for tragedies when available but falling back to
+automatic lemmatization with Stanza would have led to data compatibility issues, so for the sake of
+consistency stanza was used for all tragedies.) Lemmatized forms were used rather than the inflected
+forms to help control for differences of dialect. The different meters of Homer and tragedy—dactylic
+hexameter and a mix of iambic and lyric meters, respectively—mean that bag-of-words models help to
+avoid potential syntactic pitfalls associated with different word order necessitated by different
+meter.
 
-Lemmata were subsequently used to build document-term matrices (DTMs) in
-Pandas, a Python library for data manipulation. All code used in these analyses
-is available in the following
-[repository](https://github.com/pletcher/ccc-2026). Each row in a DTM
-represents a lemma, with columns representing dramatist, play title, and
-speaker. The value at the intersection of each row and column is the absolute
-(raw) frequency that a given lemma appears in the work, speaker, or playwright
-associated with the column. Similar DataFrames (the Pandas term for the data
-structure employed here) were prepared for Homer, with one row per lemma and
-columns for each epic.
+Lemmata were subsequently used to build document-term matrices (DTMs) in Pandas, a Python
+library for data manipulation. All code used in these analyses is available in the following
+[repository](https://github.com/pletcher/ccc-2026). Each row in a DTM represents a lemma, with
+columns representing dramatist, play title, and speaker. The value at the intersection of each
+row and column is the absolute (raw) frequency that a given lemma appears in the work, speaker, or
+playwright associated with the column. Similar DataFrames (the Pandas term for the data structure
+employed here) were prepared for Homer, with one row per lemma and columns for each epic.
 
-To calculate the "Homericness" or "epicness" (I use these terms
-interchangeably) of each lemma, first the Dunning G^2 log-likelihood ratio of
-it appearing in tragedy versus it appearing in epic was calculated
-([@Dunning1993]). Positive values mean that a lemma skews more Homeric;
-negative values indicate the it tends to appear more frequently in tragedy. The
-top 10 lemmata for each genre are reproduced in tabular form below.
+To calculate the "Homericness" or "epicness" (I use these terms interchangeably) of each lemma,
+first the Dunning G^2 log-likelihood ratio of it appearing in tragedy versus it appearing in epic
+was calculated ([@Dunning1993]). Positive values mean that a lemma skews more Homeric; negative
+values indicate the it tends to appear more frequently in tragedy. The top 10 lemmata for each genre
+are reproduced in tabular form below.
 
 Top lemmata for tragedy:
 
@@ -196,7 +243,7 @@ where $\lambda(w)$ is the epicness score for a word $w$, and $P(w \mid \text{epi
 ## Results
 
 When we plot the "epicness" scores against the probable dates of each tragedy, we see a small
-but measurable decrease in epicness over time. The changes by dramatist, while overall less
+but measurable decrease in epicness over time. The changes by dramatist, while overall not
 statistically significant (p > 0.5), will nevertheless not surprise classicists: Euripides alone
 appears to grow _more_ epic over time, perhaps owing to his well-attested penchant for archaizing
 language.
