@@ -47,7 +47,7 @@ def build_speech_lines(work: str, refs: list[tuple[str, str]]) -> set[tuple[str,
 
     A handful of speeches (e.g. Odysseus's tale to the Phaeacians) span
     multiple books, so we can't always assume `l_fi` and `l_la` share a book
-    and do naive int arithmetic on the line numbers. For those we look up
+    and do int arithmetic on the line numbers. For those we look up
     where each endpoint falls in the treebank's actual line sequence and
     slice between them. Same-book ranges use plain int arithmetic instead,
     since a handful of line numbers (e.g. Odyssey 10.456) are simply absent
@@ -71,6 +71,23 @@ def build_speech_lines(work: str, refs: list[tuple[str, str]]) -> set[tuple[str,
         lines.update(refs[start_idx : end_idx + 1])
 
     return lines
+
+
+def build_ngrams(n=2) -> dict[str, dict[tuple, int]]:
+    counts: dict[str, dict[tuple, int]] = defaultdict(lambda: defaultdict(int))
+
+    for work, path in FILES.items():
+        for sent in conllu.parse_incr(path.open()):
+            no_punct = [t for t in sent if not all(c in PUNCTUATION for c in t["lemma"])]
+            no_stops = [t for t in no_punct if not t["lemma"] in STOPWORDS]
+            tokens = [t for t in no_stops if t["lemma"]]
+            lemmata = [t["lemma"] for t in tokens]
+            ngrams = [tuple(lemmata[i:i+n]) for i in range(len(lemmata) - n + 1)]
+
+            for gram in ngrams:
+                counts[work][gram] += 1
+
+    return counts
 
 
 def build_counts() -> dict[tuple[str, str], dict[str, int]]:
@@ -150,6 +167,89 @@ def build_epic_counts() -> dict[str, dict[str, int]]:
     return counts
 
 
+def build_ngram_with_register_counts(n=2) -> dict[tuple[str, str], dict[tuple, int]]:
+    """N-gram analogue of `build_counts`: counts n-grams by (work, register).
+
+    A gram is only counted if every token in its window has a resolvable
+    `Ref` and all of them fall in the same register; grams that straddle a
+    speech/narrative boundary (or contain a token with no ref) are dropped
+    rather than assigned to either side.
+    """
+    counts: dict[tuple[str, str], dict[tuple, int]] = defaultdict(
+        lambda: defaultdict(int)
+    )
+
+    for work, path in FILES.items():
+        refs = ordered_refs(path)
+        speech_lines = build_speech_lines(work, refs)
+
+        for sent in conllu.parse_incr(path.open()):
+            no_punct = [t for t in sent if not all(c in PUNCTUATION for c in t["lemma"])]
+            no_stops = [t for t in no_punct if t["lemma"] not in STOPWORDS]
+            tokens = [t for t in no_stops if t["lemma"]]
+            lemmata = [t["lemma"] for t in tokens]
+
+            for i in range(len(lemmata) - n + 1):
+                window = tokens[i:i + n]
+                registers = set()
+
+                for t in window:
+                    misc = t.get("misc") or {}
+                    ref = misc.get("Ref")
+                    if ref is None:
+                        registers.add(None)
+                        break
+                    book, line = ref.split(".")
+                    registers.add(
+                        "speech" if (book, line) in speech_lines else "narrative"
+                    )
+
+                if len(registers) != 1 or None in registers:
+                    continue
+
+                register = registers.pop()
+                gram = tuple(lemmata[i:i + n])
+                counts[(work, register)][gram] += 1
+
+    return counts
+
+
+def build_bigram_register_dataframe(
+    counts: dict[tuple[str, str], dict[tuple, int]]
+) -> pd.DataFrame:
+    keys = [
+        ("iliad", "speech"),
+        ("iliad", "narrative"),
+        ("odyssey", "speech"),
+        ("odyssey", "narrative"),
+    ]
+
+    bigrams = sorted({gram for cell in counts.values() for gram in cell})
+
+    columns = pd.MultiIndex.from_tuples(keys, names=["work", "register"])
+    df = pd.DataFrame(0, index=bigrams, columns=columns)
+    df.index.name = "bigram"
+
+    for key, cell in counts.items():
+        df[key] = df.index.map(cell).fillna(0).astype(int)
+
+    return df
+
+
+def build_bigram_dataframe(counts: dict[str, dict[tuple, int]]) -> pd.DataFrame:
+    works = list(FILES.keys())
+    bigrams = sorted({gram for cell in counts.values() for gram in cell})
+
+    df = pd.DataFrame(0, index=bigrams, columns=works)
+    df.index.name = "bigram"
+
+    for work, cell in counts.items():
+        df[work] = df.index.map(cell).fillna(0).astype(int)
+
+    return df
+
+
+
 def build_epic_dataframe(counts: dict[str, dict[str, int]]) -> pd.DataFrame:
     works = list(FILES.keys())
     lemmata = sorted({lemma for cell in counts.values() for lemma in cell})
@@ -164,10 +264,18 @@ def build_epic_dataframe(counts: dict[str, dict[str, int]]) -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    counts = build_counts()
-    df = build_dataframe(counts)
-    df.to_parquet(ROOT_DIR / "parquet" / "homer_speech_narrative.parquet")
+    # counts = build_counts()
+    # df = build_dataframe(counts)
+    # df.to_parquet(ROOT_DIR / "parquet" / "homer_speech_narrative.parquet")
 
-    epic_counts = build_epic_counts()
-    epic_df = build_epic_dataframe(epic_counts)
-    epic_df.to_parquet(ROOT_DIR / "parquet" / "homer_epic.parquet")
+    # epic_counts = build_epic_counts()
+    # epic_df = build_epic_dataframe(epic_counts)
+    # epic_df.to_parquet(ROOT_DIR / "parquet" / "homer_epic.parquet")
+
+    bigram_counts = build_ngrams()
+    bigram_df = build_bigram_dataframe(bigram_counts)
+    bigram_df.to_parquet(ROOT_DIR / "parquet" / "bigrams_by_epic.parquet")
+
+    bigram_register_counts = build_ngram_with_register_counts()
+    bigram_register_df = build_bigram_register_dataframe(bigram_register_counts)
+    bigram_register_df.to_parquet(ROOT_DIR / "parquet" / "bigrams_by_epic_and_register.parquet")

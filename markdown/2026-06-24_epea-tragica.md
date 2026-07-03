@@ -1,5 +1,14 @@
 # ἔπεα τραγικά: Differentiating epic and tragedy through vocabulary
 
+## Preamble: Declaration on AI
+
+No AI was used to write any of the prose presented here, nor was it used to generate any of the
+ideas nor to conduct any research or summarization. AI use was constrained to manipulating Pandas,
+the DataFrame library used in the analyses presented here, and working with the graphing libraries
+like Altair and matplotlib. All work was checked and verified by me, which included catching and
+correcting a major counting error in one of the DataFrames. Responsibility for this work, and any
+errors therein, can only be claimed by the human writing it.
+
 ## Introduction
 
 In a recent monograph on the chronology of early Greek hexameter poetry, Tom McConnell employs
