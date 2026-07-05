@@ -78,11 +78,13 @@ def build_ngrams(n=2) -> dict[str, dict[tuple, int]]:
 
     for work, path in FILES.items():
         for sent in conllu.parse_incr(path.open()):
-            no_punct = [t for t in sent if not all(c in PUNCTUATION for c in t["lemma"])]
-            no_stops = [t for t in no_punct if not t["lemma"] in STOPWORDS]
+            no_punct = [
+                t for t in sent if not all(c in PUNCTUATION for c in t["lemma"])
+            ]
+            no_stops = [t for t in no_punct if t["lemma"] not in STOPWORDS]
             tokens = [t for t in no_stops if t["lemma"]]
             lemmata = [t["lemma"] for t in tokens]
-            ngrams = [tuple(lemmata[i:i+n]) for i in range(len(lemmata) - n + 1)]
+            ngrams = [tuple(lemmata[i : i + n]) for i in range(len(lemmata) - n + 1)]
 
             for gram in ngrams:
                 counts[work][gram] += 1
@@ -184,21 +186,22 @@ def build_ngram_with_register_counts(n=2) -> dict[tuple[str, str], dict[tuple, i
         speech_lines = build_speech_lines(work, refs)
 
         for sent in conllu.parse_incr(path.open()):
-            no_punct = [t for t in sent if not all(c in PUNCTUATION for c in t["lemma"])]
+            no_punct = [
+                t for t in sent if not all(c in PUNCTUATION for c in t["lemma"])
+            ]
             no_stops = [t for t in no_punct if t["lemma"] not in STOPWORDS]
             tokens = [t for t in no_stops if t["lemma"]]
             lemmata = [t["lemma"] for t in tokens]
 
             for i in range(len(lemmata) - n + 1):
-                window = tokens[i:i + n]
+                window = tokens[i : i + n]
                 registers = set()
 
                 for t in window:
                     misc = t.get("misc") or {}
                     ref = misc.get("Ref")
                     if ref is None:
-                        registers.add(None)
-                        break
+                        continue
                     book, line = ref.split(".")
                     registers.add(
                         "speech" if (book, line) in speech_lines else "narrative"
@@ -208,14 +211,14 @@ def build_ngram_with_register_counts(n=2) -> dict[tuple[str, str], dict[tuple, i
                     continue
 
                 register = registers.pop()
-                gram = tuple(lemmata[i:i + n])
+                gram = tuple(lemmata[i : i + n])
                 counts[(work, register)][gram] += 1
 
     return counts
 
 
 def build_bigram_register_dataframe(
-    counts: dict[tuple[str, str], dict[tuple, int]]
+    counts: dict[tuple[str, str], dict[tuple, int]],
 ) -> pd.DataFrame:
     keys = [
         ("iliad", "speech"),
@@ -249,7 +252,6 @@ def build_bigram_dataframe(counts: dict[str, dict[tuple, int]]) -> pd.DataFrame:
     return df
 
 
-
 def build_epic_dataframe(counts: dict[str, dict[str, int]]) -> pd.DataFrame:
     works = list(FILES.keys())
     lemmata = sorted({lemma for cell in counts.values() for lemma in cell})
@@ -263,14 +265,14 @@ def build_epic_dataframe(counts: dict[str, dict[str, int]]) -> pd.DataFrame:
     return df
 
 
-if __name__ == "__main__":
-    # counts = build_counts()
-    # df = build_dataframe(counts)
-    # df.to_parquet(ROOT_DIR / "parquet" / "homer_speech_narrative.parquet")
+def main():
+    counts = build_counts()
+    df = build_dataframe(counts)
+    df.to_parquet(ROOT_DIR / "parquet" / "homer_speech_narrative.parquet")
 
-    # epic_counts = build_epic_counts()
-    # epic_df = build_epic_dataframe(epic_counts)
-    # epic_df.to_parquet(ROOT_DIR / "parquet" / "homer_epic.parquet")
+    epic_counts = build_epic_counts()
+    epic_df = build_epic_dataframe(epic_counts)
+    epic_df.to_parquet(ROOT_DIR / "parquet" / "homer_epic.parquet")
 
     bigram_counts = build_ngrams()
     bigram_df = build_bigram_dataframe(bigram_counts)
@@ -278,4 +280,10 @@ if __name__ == "__main__":
 
     bigram_register_counts = build_ngram_with_register_counts()
     bigram_register_df = build_bigram_register_dataframe(bigram_register_counts)
-    bigram_register_df.to_parquet(ROOT_DIR / "parquet" / "bigrams_by_epic_and_register.parquet")
+    bigram_register_df.to_parquet(
+        ROOT_DIR / "parquet" / "bigrams_by_epic_and_register.parquet"
+    )
+
+
+if __name__ == "__main__":
+    main()
