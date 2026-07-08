@@ -20,7 +20,7 @@ SPEECH_JSON = {
     "odyssey": ROOT_DIR / "json" / "odyssey_speeches.json",
 }
 
-OUT_FILE = ROOT_DIR / "csv" / "homer_speech_and_narrative_by_sentence.csv"
+OUT_FILE = ROOT_DIR / "csv" / "homer_speech_and_narrative_by_line-APOLOGOI_ONLY.csv"
 
 
 def ordered_refs(path: Path) -> list[tuple[str, str]]:
@@ -82,17 +82,31 @@ def in_apologoi(book, line):
     return False
 
 
-def build_sentences(exclude_apologoi=False):
-    sentences = []
+def build_lines():
+    lines = []
 
     for work, path in FILES.items():
         refs = ordered_refs(path)
         speech_lines = build_speech_lines(work, refs)
 
-        for sent in conllu.parse_incr(path.open()):
-            tokens = []
-            registers = []
+        current_ref = None
+        current_tokens: list = []
 
+        def flush():
+            if not current_tokens:
+                return
+
+            forms = [t.get("form") for t in current_tokens]
+            register = "speech" if current_ref in speech_lines else "narrative"
+
+            lines.append(
+                dict(
+                    text=" ".join(forms),
+                    register=register,
+                )
+            )
+
+        for sent in conllu.parse_incr(path.open()):
             for token in sent:
                 # we use an `or` here instead of a default value
                 # because `misc` can be set to None — so the default
@@ -113,57 +127,30 @@ def build_sentences(exclude_apologoi=False):
                     continue
 
                 book, line = ref.split(".")
-                if exclude_apologoi and work == "odyssey" and in_apologoi(book, line):
-                    continue
-                register = "speech" if (book, line) in speech_lines else "narrative"
+                if work == "odyssey" and in_apologoi(book, line):
+                    token_ref = (book, line)
 
-                tokens.append(token)
-                registers.append(register)
+                    if token_ref != current_ref:
+                        flush()
+                        current_ref = token_ref
+                        current_tokens = []
 
-            if len(registers) == 0:
-                continue
+                    current_tokens.append(token)
 
-            if len(set(registers)) > 1:
-                print(
-                    f"More than one register for {tokens[0].get('misc').get('Ref')}: {registers}"
-                )
+        flush()
+        current_ref = None
+        current_tokens = []
 
-            text = " ".join([t.get("form") for t in tokens])
-
-            sentences.append(
-                dict(
-                    text=text,
-                    register=("speech" if "speech" in registers else "narrative"),
-                )
-            )
-
-    return sentences
+    return lines
 
 
-def main(args):
-    sentences = build_sentences(args.exclude_apologoi)
+def main():
+    lines = build_lines()
 
-    df = pd.DataFrame(sentences)
+    df = pd.DataFrame(lines)
 
-    outfile = OUT_FILE
-    if args.exclude_apologoi:
-        outfile = OUT_FILE.with_stem(OUT_FILE.stem + "_no-apologoi")
-
-    df.to_csv(outfile, index=False)
+    df.to_csv(OUT_FILE, index=False)
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Convert CoNLL-U treebanks to lines, optionally excluding Odysseus' _Apologoi_"
-    )
-
-    parser.add_argument(
-        "--exclude-apologoi",
-        type=bool,
-        default=False,
-        help="Exclude _Odyssey_ 9.2 to 12.453",
-    )
-
-    args = parser.parse_args()
-
-    main(args)
+    main()

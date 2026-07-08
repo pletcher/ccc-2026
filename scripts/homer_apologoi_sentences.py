@@ -20,7 +20,7 @@ SPEECH_JSON = {
     "odyssey": ROOT_DIR / "json" / "odyssey_speeches.json",
 }
 
-OUT_FILE = ROOT_DIR / "csv" / "homer_speech_and_narrative_by_sentence.csv"
+OUT_FILE = ROOT_DIR / "csv" / "homer_speech_and_narrative_by_sentence-APOLOGOI_ONLY.csv"
 
 
 def ordered_refs(path: Path) -> list[tuple[str, str]]:
@@ -82,7 +82,7 @@ def in_apologoi(book, line):
     return False
 
 
-def build_sentences(exclude_apologoi=False):
+def build_sentences():
     sentences = []
 
     for work, path in FILES.items():
@@ -113,12 +113,11 @@ def build_sentences(exclude_apologoi=False):
                     continue
 
                 book, line = ref.split(".")
-                if exclude_apologoi and work == "odyssey" and in_apologoi(book, line):
-                    continue
-                register = "speech" if (book, line) in speech_lines else "narrative"
+                if work == "odyssey" and in_apologoi(book, line):
+                    register = "speech" if (book, line) in speech_lines else "narrative"
 
-                tokens.append(token)
-                registers.append(register)
+                    tokens.append(token)
+                    registers.append(register)
 
             if len(registers) == 0:
                 continue
@@ -140,16 +139,12 @@ def build_sentences(exclude_apologoi=False):
     return sentences
 
 
-def main(args):
-    sentences = build_sentences(args.exclude_apologoi)
+def main():
+    sentences = build_sentences()
 
     df = pd.DataFrame(sentences)
 
-    outfile = OUT_FILE
-    if args.exclude_apologoi:
-        outfile = OUT_FILE.with_stem(OUT_FILE.stem + "_no-apologoi")
-
-    df.to_csv(outfile, index=False)
+    df.to_csv(OUT_FILE, index=False)
 
 
 if __name__ == "__main__":
@@ -166,4 +161,4 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    main(args)
+    main()

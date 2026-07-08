@@ -15,3 +15,4 @@ Daphne
 .DS_Store
 *.docx
 .envrc
+speech-narrative_classification_model_output/*
