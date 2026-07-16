@@ -20,7 +20,7 @@ SPEECH_JSON = {
     "odyssey": ROOT_DIR / "json" / "odyssey_speeches.json",
 }
 
-OUT_FILE = ROOT_DIR / "csv" / "homer_speech_and_narrative_by_sentence.csv"
+OUT_FILE = ROOT_DIR / "csv" / "homer_speech_and_narrative_by_sentence_no-nestor.csv"
 
 
 def ordered_refs(path: Path) -> list[tuple[str, str]]:
@@ -82,6 +82,18 @@ def in_apologoi(book, line):
     return False
 
 
+def in_nestor_book_11(book, line):
+    book = int(book)
+
+    if book == 11:
+        line = int(line)
+
+        if line >= 656 and line <= 803:
+            return True
+
+    return False
+
+
 def build_sentences(exclude_apologoi=False):
     sentences = []
 
@@ -115,6 +127,11 @@ def build_sentences(exclude_apologoi=False):
                 book, line = ref.split(".")
                 if exclude_apologoi and work == "odyssey" and in_apologoi(book, line):
                     continue
+
+                # exclude Nestor's long narrative too
+                # if work == "iliad" and in_nestor_book_11(book, line):
+                #     continue
+
                 register = "speech" if (book, line) in speech_lines else "narrative"
 
                 tokens.append(token)
